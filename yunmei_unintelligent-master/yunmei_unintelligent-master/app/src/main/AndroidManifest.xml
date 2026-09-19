@@ -109,6 +109,15 @@
             android:taskAffinity=""
             android:theme="@style/Theme.UnlockInvisible" />
 
+        <!-- ★ 新增（v3）：卡片封面设置页（从卡片右下角小齿轮进入）。
+             注意：不能加 noHistory——要活着接收相册选图的结果回调 -->
+        <activity
+            android:name=".CoverPickActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@style/Theme.UnlockInvisible" />
+
         <service
             android:name=".serviceOpenDoor"
             android:label="开门"
