@@ -1,0 +1,31 @@
+# 放到 /etc/systemd/system/yunmei.service，然后：
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now yunmei
+#   journalctl -u yunmei -f
+#
+# 文件里的 __YUNMEI_USER__ / __YUNMEI_HOME__ 是占位符：
+#   · 用 setup.sh --service 安装会自动替换成你的用户名和 ~/yunmei
+#   · 手动安装就自己把这两样替换掉（__YUNMEI_HOME__ 即你放代码的目录）
+
+[Unit]
+Description=Yunmei dorm lock BLE unlock service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__YUNMEI_USER__
+WorkingDirectory=__YUNMEI_HOME__
+Environment=YUNMEI_CONFIG=__YUNMEI_HOME__/yunmei_config.json
+ExecStart=__YUNMEI_HOME__/venv/bin/python __YUNMEI_HOME__/yunmei_server.py
+Restart=always
+RestartSec=3
+
+# learn_mac 会把学到的蓝牙地址写回 yunmei_config.json，
+# 所以 ProtectSystem=strict 时必须留出这个目录的写权限，否则只能退化成一路上去都扫描
+ProtectSystem=strict
+ReadWritePaths=__YUNMEI_HOME__
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

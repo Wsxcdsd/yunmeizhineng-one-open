@@ -1,0 +1,23 @@
+# ==== 绝不能进仓库的（含永久开门钥匙/个人凭据）====
+yunmei_config.json
+*_config.json
+*.key
+*.pem
+
+# ==== 个人本地环境 ====
+*.log
+_cfg_guard_tmp/
+local.properties
+
+# ==== Python ====
+__pycache__/
+*.pyc
+
+# ==== Android / Gradle ====
+*.apk
+android-widget-mod/app/build/
+android-widget-mod/.gradle/
+android-widget-mod/build/
+.gradle/
+.idea/
+*.iml

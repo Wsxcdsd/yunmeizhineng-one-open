@@ -1,0 +1,52 @@
+{
+  "_说明": "复制成 yunmei_config.json 后填写。推荐直接用 `python yunmei.py 账号 密码 --dump-config yunmei_config.json` 自动生成，本文件只作字段说明。",
+
+  "bind": "0.0.0.0:8791",
+  "_bind": "手机要靠局域网访问，所以监听 0.0.0.0（或只写小主机的局域网 IP）。只在寝室内网可达，别做公网端口映射。",
+
+  "tokens": ["一串随机字符串；手机 URL 上的 ?t= 就是它"],
+  "_tokens": "每人一个，方便知道是谁开的门；泄露了就单独删这一条。",
+
+  "allow_auto": true,
+  "_allow_auto": "true=打开页面就自动开门（配合桌面图标即'点一下即开'，无需再点按钮）。想保留手动点按钮就设 false。可临时用 URL 加 &noauto 关闭单次。",
+
+  "cooldown_sec": 5,
+  "scan_timeout_sec": 10,
+  "direct_timeout_sec": 6,
+  "cache_fresh_sec": 30,
+
+  "bg_scan": true,
+  "_bg_scan": "true=后台常驻监听蓝牙广播，实时掌握锁的地址，让点击走'直连'而非'现场扫描'，是秒开的关键。",
+
+  "keep_connected": false,
+  "_keep_connected": "true=保持一条到锁的 BLE 长连接，开门可压到亚秒级；但个别锁/适配器长连接不稳，默认关。",
+
+  "learn_mac": true,
+  "_learn_mac": "true=开门成功后把锁的真实蓝牙地址写回本文件的 mac 字段，下次直接连。",
+
+  "default_lock": "1号楼-305",
+
+  "only_if_name_contains": [],
+  "_only_if_name_contains": "同层有多把同型号锁互相干扰时，填蓝牙名前缀过滤，例如 [\"YM\"]。留空=只按服务 UUID 判断。",
+
+  "_locks_说明": "BLE 开门完全离线、只需 secret。mac 留空也能用（首次会自动学习）。",
+  "locks": [
+    {
+      "label": "1号楼-305",
+      "lock_no": "AA:BB:CC:DD:EE:FF",
+      "mac": "AA:BB:CC:DD:EE:FF",
+      "secret": "云端下发的 lockSecret，开锁的唯一密钥",
+      "service": "00006e40-1000-1000-8000-00805f9b34fb",
+      "characteristic": "00006e40-0002-1000-8000-00805f9b34fb",
+      "notify_characteristic": "00006e40-0003-1000-8000-00805f9b34fb"
+    }
+  ],
+
+  "_account": {
+    "_说明": "可选。仅用于以后刷新 locks 或取动态密码，BLE 开门用不到。",
+    "username_md5": "",
+    "password_md5": "",
+    "school_no": "",
+    "server": ""
+  }
+}

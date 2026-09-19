@@ -1,0 +1,36 @@
+# 放到 fork 仓库的 .github/workflows/build-apk.yml
+# 之后每次 push（或在 Actions 页手动点 Run workflow）都会自动打包，
+# 构建完成后在该次运行页面底部下载 yunmei-widget-debug-apk 里的 app-debug.apk
+#
+# 注意：原项目用 AGP 7.1.2 + Gradle 7.2，只兼容 JDK 11（JDK 17 会报
+# "Unsupported class file major version 61"），所以这里固定 java-version 11
+name: Build APK
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '11'
+
+      - name: Build debug APK
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: yunmei-widget-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
