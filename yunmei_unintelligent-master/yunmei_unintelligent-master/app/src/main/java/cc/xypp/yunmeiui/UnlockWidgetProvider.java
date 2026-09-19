@@ -140,7 +140,8 @@ public class UnlockWidgetProvider extends AppWidgetProvider {
             return;
         }
 
-        BleManager.getInstance().init(context.getApplicationContext());
+        // FastBleLib 的 init 只收 Application；getApplicationContext() 的实际对象就是它
+        BleManager.getInstance().init((android.app.Application) context.getApplicationContext());
         if (!BleManager.getInstance().isSupportBle()) {
             toast(context, "设备不支持蓝牙");
             RUNNING.set(false);
