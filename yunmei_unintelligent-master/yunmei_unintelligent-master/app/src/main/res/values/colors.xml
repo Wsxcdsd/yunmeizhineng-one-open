@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ★ v6：原 10 个颜色条目全部保留，新增 6 个蓝白精修语义色 -->
 <resources>
     <color name="info_color">#4dabf7</color>
     <color name="primary_color">#228be6</color>
@@ -12,4 +13,12 @@
 
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- ★ v6 新增：蓝白精修语义色 -->
+    <color name="bg_soft">#F4F7FB</color>
+    <color name="text_main">#1F2933</color>
+    <color name="text_sub">#64748B</color>
+    <color name="primary_dark">#1C7ED6</color>
+    <color name="card_line">#E3EAF3</color>
+    <color name="success_green">#2F9E44</color>
 </resources>
