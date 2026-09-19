@@ -10,6 +10,23 @@
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
         <item name="android:statusBarColor" >?attr/colorPrimaryVariant</item>
+
+        <!-- ★ v6 蓝白精修：全部为全局样式层调整，不触碰任何布局结构 -->
+        <!-- 柔和蓝白窗口背景（设置页/主界面统一生效） -->
+        <item name="android:windowBackground">@color/bg_soft</item>
+        <item name="android:colorBackground">@color/bg_soft</item>
+        <!-- 文字改柔和深灰（开关/单选/说明文字自动继承），替代刺眼纯黑 -->
+        <item name="android:textColorPrimary">@color/text_main</item>
+        <item name="android:textColorSecondary">@color/text_sub</item>
+        <!-- 按钮与输入框统一 12dp 圆角（胶囊感），Material3 全局生效 -->
+        <item name="shapeAppearanceSmallComponent">@style/Shape.Rounded12</item>
+        <item name="shapeAppearanceMediumComponent">@style/Shape.Rounded12</item>
+    </style>
+
+    <!-- ★ v6：统一圆角形状 -->
+    <style name="Shape.Rounded12" parent="ShapeAppearance.Material3.SmallComponent">
+        <item name="cornerSize">12dp</item>
+        <item name="cornerFamily">rounded</item>
     </style>
 
     <!-- ★ 新增：小部件点击后的隐形中转页主题。
