@@ -198,6 +198,11 @@ public class settingActivity extends AppCompatActivity {
         startActivity(new Intent(this, lockInfoActivity.class));
     }
 
+    /** ★ v4：卡片封面设置入口（桌面卡片右下角的齿轮已移除，改由软件内设置） */
+    public void clickCardCover(View view) {
+        startActivity(new Intent(this, CoverPickActivity.class));
+    }
+
     public void about(View view) {
         Uri uri = Uri.parse("https://yunmei.xypp.cc/");
         Intent intent = new Intent(Intent.ACTION_VIEW, uri);
