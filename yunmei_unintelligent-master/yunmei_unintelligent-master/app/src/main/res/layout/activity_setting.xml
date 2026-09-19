@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ★ v4 改动：在「查看门锁 / 导入门锁」按钮行新增「卡片封面」按钮（onClick=clickCardCover），
+     其余与原版 activity_setting.xml 逐行一致 -->
 <androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -288,6 +290,14 @@
                     android:layout_marginStart="8dp"
                     android:onClick="scanQR"
                     android:text="导入门锁" />
+
+                <Button
+                    android:id="@+id/button_card_cover"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="8dp"
+                    android:onClick="clickCardCover"
+                    android:text="卡片封面" />
 
             </LinearLayout>
 

@@ -1,31 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 桌面小部件布局。注意：RemoteViews 只支持基础控件（LinearLayout/ImageView/TextView 等） -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<!-- 桌面小部件布局 v4。注意：RemoteViews 只支持基础控件（FrameLayout/LinearLayout/ImageView/TextView 等）。
+     两层结构（v4 起「更换封面」入口移到 App 设置页，卡片上不再有齿轮）：
+       1) widget_cover    自定义封面（用户选图后显示，centerCrop 铺满）
+       2) widget_default  默认外观（挂锁图标 + 锁名）
+     主体点击（widget_root）始终 = 开门广播 -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/widget_bg"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="6dp">
+    android:background="@drawable/widget_bg">
 
     <ImageView
-        android:id="@+id/widget_icon"
+        android:id="@+id/widget_cover"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:scaleType="fitCenter"
-        android:src="@drawable/widget_icon"
-        android:contentDescription="开门" />
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:visibility="gone"
+        android:contentDescription="@string/unlockWidgetLabel" />
 
-    <TextView
-        android:id="@+id/widget_lock_name"
+    <LinearLayout
+        android:id="@+id/widget_default"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
         android:gravity="center"
-        android:text="开门"
-        android:textColor="#FFFFFF"
-        android:textSize="11sp"
-        android:maxLines="1"
-        android:ellipsize="end" />
-</LinearLayout>
+        android:padding="6dp">
+
+        <ImageView
+            android:id="@+id/widget_icon"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:scaleType="fitCenter"
+            android:src="@drawable/widget_icon"
+            android:contentDescription="@string/unlockWidgetLabel" />
+
+        <TextView
+            android:id="@+id/widget_lock_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="开门"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
+    </LinearLayout>
+</FrameLayout>
