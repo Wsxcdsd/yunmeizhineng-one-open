@@ -29,7 +29,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import cc.xypp.yunmeiui.eneity.Lock;
 import cc.xypp.yunmeiui.function.UnlockService;
 import cc.xypp.yunmeiui.utils.LockManageUtil;
-import cc.xypp.yunmeiui.utils.ToastUtil;
 
 /**
  * 桌面「一键开门」小部件。
@@ -41,7 +40,13 @@ import cc.xypp.yunmeiui.utils.ToastUtil;
  *
  * v3：支持自定义卡片封面——长边 ≤300px 的图片存在应用私有目录
  * files/widget_cover.png（由 CoverPickActivity 写入），有图时铺满卡片并隐藏
- * 默认挂锁+锁名；没图时保持默认外观。右下角小齿轮 = 更换封面入口。
+ * 默认挂锁+锁名；没图时保持默认外观。
+ *
+ * v5：开门反馈从 Toast 改为「卡片内联状态」——点击后卡片立刻变成状态卡
+ * （正在开门… / 开门完成 ✓ / 电量 xx% / 失败原因），2.5 秒后自动变回封面或
+ * 默认外观。注意：realme UI 等国产桌面会给小部件点击播放系统级收场动画
+ * （黑框缩回卡片），该动画由厂商桌面绘制、无公开 API 可关闭；有了卡片上的
+ * 即时反馈后其突兀感可大幅降低。
  */
 public class UnlockWidgetProvider extends AppWidgetProvider {
 
@@ -85,14 +90,51 @@ public class UnlockWidgetProvider extends AppWidgetProvider {
         }
 
         // 主体点击 = 开门广播（不触发系统转场动效）
+        attachUnlockClick(context, views);
+        // v4：「更换封面」入口移到 App 设置页，卡片上不再有齿轮
+        return views;
+    }
+
+    /** 卡片主体 = 开门广播（正常外观与状态卡共用） */
+    private static void attachUnlockClick(Context context, RemoteViews views) {
         Intent unlock = new Intent(context, UnlockWidgetProvider.class);
         unlock.setAction(ACTION_WIDGET_UNLOCK);
         views.setOnClickPendingIntent(R.id.widget_root, PendingIntent.getBroadcast(
                 context, 0, unlock,
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE));
-        // v4：「更换封面」入口移到 App 设置页，卡片上不再有齿轮
-        return views;
     }
+
+    /**
+     * v5：把所有卡片实例临时切换成「状态卡」——隐藏封面、显示状态文字。
+     * 结束后用 refreshAll() 还原（自动回到封面或默认外观）。
+     */
+    private static void showStatus(Context context, String text) {
+        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.unlock_widget);
+        views.setViewVisibility(R.id.widget_cover, View.GONE);
+        views.setViewVisibility(R.id.widget_default, View.VISIBLE);
+        views.setTextViewText(R.id.widget_lock_name, text);
+        attachUnlockClick(context, views);
+        AppWidgetManager manager = AppWidgetManager.getInstance(context);
+        int[] ids = manager.getAppWidgetIds(new ComponentName(context, UnlockWidgetProvider.class));
+        if (ids.length > 0) {
+            manager.updateAppWidget(ids, views);
+        }
+    }
+
+    /** 状态卡停留 2.5 秒后还原为正常外观；重复调用会先撤销上一次的还原任务 */
+    private static void scheduleClear(final Context context) {
+        final Context app = context.getApplicationContext();
+        if (pendingClear != null) {
+            MAIN.removeCallbacks(pendingClear);
+        }
+        pendingClear = () -> {
+            pendingClear = null;
+            refreshAll(app);
+        };
+        MAIN.postDelayed(pendingClear, 2500);
+    }
+
+    private static Runnable pendingClear;
 
     /** 封面变化后调用：让缓存失效并立即刷新桌面上所有卡片实例 */
     public static void refreshAll(Context context) {
@@ -119,13 +161,14 @@ public class UnlockWidgetProvider extends AppWidgetProvider {
         return decoded;
     }
 
-    /** 后台直开：权限齐全时不启动任何界面，只用 Toast 汇报 */
+    /** 后台直开：权限齐全时不启动任何界面，过程与结果直接显示在卡片上 */
     private void unlockInPlace(final Context context) {
         final Lock currentLock = pickLock(context);
         if (currentLock == null
                 || currentLock.D_CHAR == null || currentLock.D_CHAR.equals("")
                 || currentLock.D_SERV == null || currentLock.D_SERV.equals("")) {
-            toast(context, "还没有可用的门锁，请先打开 App 登录并添加门锁");
+            showStatus(context, "没有可用门锁");
+            scheduleClear(context);
             return;
         }
         if (permissionsMissing(context)) {
@@ -136,14 +179,15 @@ public class UnlockWidgetProvider extends AppWidgetProvider {
             return;
         }
         if (!RUNNING.compareAndSet(false, true)) {
-            toast(context, "正在开门，请稍候");
+            // 正在开门中：状态卡已经在显示，无需任何提示
             return;
         }
 
         // FastBleLib 的 init 只收 Application；getApplicationContext() 的实际对象就是它
         BleManager.getInstance().init((android.app.Application) context.getApplicationContext());
         if (!BleManager.getInstance().isSupportBle()) {
-            toast(context, "设备不支持蓝牙");
+            showStatus(context, "设备不支持蓝牙");
+            scheduleClear(context);
             RUNNING.set(false);
             return;
         }
@@ -156,12 +200,16 @@ public class UnlockWidgetProvider extends AppWidgetProvider {
                 new UnlockService.Callback() {
                     @Override
                     public void setpss(int pss, String tip, boolean toast) {
-                        // 只把重要的消息弹出来：失败类消息 toast=true，由这里过滤
-                        if (toast) toast(context, tip);
+                        // 只把重要的消息显示到卡片上：失败类消息 toast=true，由这里过滤
+                        if (toast) {
+                            showStatus(context, tip);
+                            scheduleClear(context);
+                        }
                     }
 
                     @Override
                     public void start() {
+                        showStatus(context, "正在开门…");
                     }
 
                     @Override
@@ -171,7 +219,8 @@ public class UnlockWidgetProvider extends AppWidgetProvider {
 
                     @Override
                     public void successed() {
-                        toast(context, "开门完成");
+                        showStatus(context, "开门完成 ✓");
+                        scheduleClear(context);
                     }
 
                     @Override
@@ -191,7 +240,8 @@ public class UnlockWidgetProvider extends AppWidgetProvider {
                         if (ab != -1) {
                             battery = (int) Math.round(100.0 * (ab - 40) / 24);
                         }
-                        toast(context, String.format("电量:%d%%", battery));
+                        showStatus(context, String.format("开门完成 ✓ 电量:%d%%", battery));
+                        scheduleClear(context);
                     }
                 },
                 currentLock,
@@ -249,10 +299,5 @@ public class UnlockWidgetProvider extends AppWidgetProvider {
         } catch (NumberFormatException e) {
             return -1;
         }
-    }
-
-    /** Toast 必须在主线程弹（openDoorWork 的等待循环会在子线程回调进度） */
-    private static void toast(final Context context, final String tip) {
-        MAIN.post(() -> ToastUtil.show(context.getApplicationContext(), tip));
     }
 }
