@@ -1,6 +1,6 @@
 <resources>
-    <!-- ★ 共存版改动：App 名改为「云莓一键开门」，桌面上与官方 App 区分 -->
-    <string name="app_name">云莓一键开门</string>
+    <!-- ★ 共存版改动：App 名（原版「云梅不智能」→ v4「云莓开锁」），桌面上与官方 App 区分 -->
+    <string name="app_name">云莓开锁</string>
     <string name="unlockShortCutDisabled">开锁功能目前不可用</string>
     <string name="unlockShortCut">开锁</string>
     <string name="signShortCutDisabled">签到功能目前不可用</string>
