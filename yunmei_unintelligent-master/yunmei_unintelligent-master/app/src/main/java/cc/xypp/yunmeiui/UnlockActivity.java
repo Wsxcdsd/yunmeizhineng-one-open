@@ -19,14 +19,15 @@ import cc.xypp.yunmeiui.utils.LockManageUtil;
 import cc.xypp.yunmeiui.utils.ToastUtil;
 
 /**
- * 桌面小部件点击后启动的「隐形中转页」。
+ * 透明中转页（v2 起退居二线）。
  *
- * 效果：用户点击桌面小部件后，屏幕上什么都不出现（仍然停留在桌面），
+ * 桌面小部件 v2 已改为「后台广播直开」：权限齐全时点卡片没有任何界面与动效。
+ * 本页只在需要弹系统权限框时被拉起（首次使用 / 权限被撤销），其余行为不变：
  * 只用 Toast 汇报关键进度（连接失败 / 开门完成 / 电量等），完成后自动消失。
  *
- * 为什么需要它：UnlockService 的权限申请逻辑依赖 Activity（第一次使用时
- * 要弹蓝牙权限对话框），小部件/广播没法弹权限框；用一个完全透明的
- * Activity 来承载，既能原样复用 App 里全部开门逻辑，又不会「跳进应用界面」。
+ * 为什么权限弹窗需要它：UnlockService 的权限申请逻辑依赖 Activity（广播没法弹
+ * 权限对话框）；用这个完全透明的 Activity 来承载，既能复用全部开门逻辑，
+ * 又不会「跳进应用界面」。
  *
  * 配套的 manifest 属性（缺一不可）：
  *   android:theme="@style/Theme.UnlockInvisible"  完全透明、无转场动画
@@ -40,8 +41,8 @@ public class UnlockActivity extends Activity {
     /** 可选：传入 Lock.toString() 序列化串指定开哪把锁；不传则用 App 里的默认锁 */
     public static final String EXTRA_LOCK = "lock";
 
-    /** 防止连点两下触发两条并发蓝牙流程（并发连接同一把锁会互相干扰） */
-    private static final AtomicBoolean RUNNING = new AtomicBoolean(false);
+    /** 防止连点两下触发两条并发蓝牙流程；与桌面卡片的广播路径共用同一个守卫 */
+    private static final AtomicBoolean RUNNING = UnlockWidgetProvider.RUNNING;
 
     private UnlockService unlockService;
     private boolean counted = false;
