@@ -1,11 +1,22 @@
 package cc.xypp.yunmeiui.function;
 
+/*
+ * ★ 桌面卡片 v2 改动说明（相对原仓库 UnlockService.java，逻辑零改动，只有 3 处适配）：
+ *   1. 构造参数 Activity → Context：桌面卡片走「后台广播」路径时没有 Activity 可传，
+ *      而日常开门路径（权限齐全）其实完全用不到 Activity；
+ *   2. 两处 ActivityCompat.requestPermissions 前加 instanceof Activity 守卫：
+ *      弹系统权限框只可能发生在 Activity 环境（App 内 / 透明中转页）；
+ *      后台广播路径在调用前已自查权限，权限不齐根本不会进来，这里是双保险；
+ *   3. 开锁报文、扫描/连接/学习地址等全部逻辑与原版逐行一致。
+ */
+
 import static java.lang.Thread.sleep;
 
 import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGatt;
+import android.content.Context;
 import android.content.pm.PackageManager;
 
 import androidx.annotation.NonNull;
@@ -79,12 +90,12 @@ public class UnlockService {
 
     private BleDevice connectedDevice;
 
-    private final Activity ctx;
+    private final Context ctx;
     private final Callback callback;
     private final Lock currentLock;
     private boolean quickConnect;
 
-    public UnlockService(Activity context, Callback _callback, Lock _currentLock, boolean _quickConnect) {
+    public UnlockService(Context context, Callback _callback, Lock _currentLock, boolean _quickConnect) {
         ctx = context;
         callback = _callback;
         currentLock = _currentLock;
@@ -105,9 +116,14 @@ public class UnlockService {
                 }
             }
             if (!denyPermissions.isEmpty()) {
-                //申请权限授权
-                callback.setpss(10, "申请权限");
-                ActivityCompat.requestPermissions(ctx, denyPermissions.toArray(new String[denyPermissions.size()]), 105);
+                //申请权限授权（弹系统权限框只可能发生在 Activity 环境；
+                //后台广播路径在进来之前已自查过权限，这里只是双保险）
+                if (ctx instanceof Activity) {
+                    ActivityCompat.requestPermissions((Activity) ctx, denyPermissions.toArray(new String[denyPermissions.size()]), 105);
+                    return;
+                }
+                callback.setpss(0, "权限不足，请先打开应用授权", true);
+                callback.end();
                 return;
             }
         }
@@ -175,8 +191,13 @@ public class UnlockService {
             }
         }
         if (!denyPermissions.isEmpty()) {
-            //申请权限授权
-            ActivityCompat.requestPermissions(ctx, denyPermissions.toArray(new String[denyPermissions.size()]), 100);
+            //申请权限授权（同上：仅 Activity 环境能弹框，后台广播路径进来前已自查权限）
+            if (ctx instanceof Activity) {
+                ActivityCompat.requestPermissions((Activity) ctx, denyPermissions.toArray(new String[denyPermissions.size()]), 100);
+                return;
+            }
+            callback.setpss(0, "权限不足，请先打开应用授权", true);
+            callback.end();
             return;
         }
 
