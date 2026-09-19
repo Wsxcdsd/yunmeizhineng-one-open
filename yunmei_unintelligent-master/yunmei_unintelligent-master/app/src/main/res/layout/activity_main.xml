@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- ★ v6 蓝白精修：结构/id/onClick 与原版逐行一致，仅调整样式属性——
+     根布局柔和蓝白背景、开门主按钮改品牌蓝+白字（20dp→20sp 修正）、
+     两个悬浮按钮 teal→品牌蓝+白色图标、底部提示文字柔化 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/bg_soft"
     android:orientation="vertical"
     android:theme="@style/Base.Theme.云梅不智能"
     tools:context=".MainActivity">
@@ -43,6 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="4dp"
+            android:textColor="@color/text_sub"
             android:text="使用"
             tools:ignore="MissingConstraints" />
 
@@ -57,6 +62,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
+            android:textColor="@color/text_sub"
             android:text="开锁"
             tools:ignore="MissingConstraints" />
 
@@ -82,9 +88,11 @@
             android:layout_width="130dp"
             android:layout_height="80dp"
             android:layout_marginTop="16dp"
+            android:backgroundTint="@color/primary_color"
             android:onClick="openDoorClick"
             android:text="开门"
-            android:textSize="20dp" />
+            android:textColor="@color/white"
+            android:textSize="20sp" />
 
         <Space
             android:layout_width="wrap_content"
@@ -152,7 +160,8 @@
                 android:clickable="true"
                 android:onClick="settingClick"
                 android:src="@android:drawable/ic_menu_manage"
-                app:backgroundTint="@color/teal_200" />
+                app:backgroundTint="@color/primary_color"
+                app:tint="@color/white" />
 
             <Space
                 android:layout_width="wrap_content"
@@ -167,7 +176,8 @@
                 android:clickable="true"
                 android:onClick="loginClick"
                 android:src="@android:drawable/ic_menu_add"
-                app:backgroundTint="@color/teal_200" />
+                app:backgroundTint="@color/primary_color"
+                app:tint="@color/white" />
 
         </LinearLayout>
 
@@ -175,6 +185,7 @@
             android:id="@+id/open_result"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textColor="@color/text_main"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
@@ -193,6 +204,9 @@
             android:layout_height="wrap_content"
             android:background="@android:color/transparent"
             android:gravity="center"
+            android:paddingBottom="6dp"
+            android:textColor="@color/text_sub"
+            android:textSize="13sp"
             android:text="仅供学习目的，请勿违法使用。点击加号可以登录"
             tools:ignore="MissingConstraints" />
     </LinearLayout>
